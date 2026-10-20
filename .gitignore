@@ -1,0 +1,12 @@
+# Maven & builds
+/target/
+*.class
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Sécurité & BDD locale (règle du cours)
+db.properties
+*.log
