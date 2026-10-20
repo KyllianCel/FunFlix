@@ -10,3 +10,8 @@
 # Sécurité & BDD locale (règle du cours)
 db.properties
 *.log
+
+
+# Identifiants locaux : ne jamais les versionner
+src/main/resources/db.properties
+*.db
