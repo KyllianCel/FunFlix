@@ -1,4 +1,4 @@
-package kit.modele;
+package funflix.modele;
 
 import java.time.LocalDate;
 

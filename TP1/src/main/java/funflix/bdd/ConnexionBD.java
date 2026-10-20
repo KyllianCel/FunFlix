@@ -1,4 +1,4 @@
-package kit.bdd;
+package funflix.bdd;
 
 import java.io.IOException;
 import java.io.InputStream;

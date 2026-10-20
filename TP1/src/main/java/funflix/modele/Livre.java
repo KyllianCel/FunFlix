@@ -1,4 +1,4 @@
-package kit.modele;
+package funflix.modele;
 
 public class Livre extends Media {
     private final int nbPages;

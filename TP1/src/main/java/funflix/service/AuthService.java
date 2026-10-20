@@ -1,9 +1,9 @@
-package kit.service;
+package funflix.service;
 
-import kit.dao.UtilisateurDao;
-import kit.modele.Role;
-import kit.modele.Utilisateur;
-import kit.securite.Hacheur;
+import funflix.dao.UtilisateurDao;
+import funflix.modele.Role;
+import funflix.modele.Utilisateur;
+import funflix.securite.Hacheur;
 
 import java.util.Optional;
 

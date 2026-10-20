@@ -1,4 +1,4 @@
-package kit.modele;
+package funflix.modele;
 
 /** Correspond à la colonne media.type (stratégie d'héritage : table unique). */
 public enum TypeMedia {

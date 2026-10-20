@@ -1,8 +1,8 @@
-package kit.dao;
+package funflix.dao;
 
-import kit.bdd.ConnexionBD;
-import kit.bdd.DaoException;
-import kit.modele.Emprunt;
+import funflix.bdd.ConnexionBD;
+import funflix.bdd.DaoException;
+import funflix.modele.Emprunt;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

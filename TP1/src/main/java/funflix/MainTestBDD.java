@@ -1,16 +1,16 @@
-package kit;
+package funflix;
 
-import kit.bdd.InitBase;
-import kit.dao.EmpruntDao;
-import kit.dao.MediaDao;
-import kit.dao.UtilisateurDao;
-import kit.modele.Emprunt;
-import kit.modele.Media;
-import kit.modele.Role;
-import kit.modele.Utilisateur;
-import kit.service.AuthService;
-import kit.service.EmpruntService;
-import kit.service.MediaIndisponibleException;
+import funflix.bdd.InitBase;
+import funflix.dao.EmpruntDao;
+import funflix.dao.MediaDao;
+import funflix.dao.UtilisateurDao;
+import funflix.modele.Emprunt;
+import funflix.modele.Media;
+import funflix.modele.Role;
+import funflix.modele.Utilisateur;
+import funflix.service.AuthService;
+import funflix.service.EmpruntService;
+import funflix.service.MediaIndisponibleException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,7 +23,7 @@ public class MainTestBDD {
 
     public static void main(String[] args) throws Exception {
         // Repartir d'une base vide à chaque lancement (SQLite : un simple fichier)
-        Files.deleteIfExists(Path.of("kit.db"));
+        Files.deleteIfExists(Path.of("funflix.db"));
         InitBase.executerScript("/schema.sql");
         InitBase.executerScript("/donnees_test.sql");
         System.out.println("1. Base créée et remplie");

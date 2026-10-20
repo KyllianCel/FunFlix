@@ -1,4 +1,4 @@
-package kit.modele;
+package funflix.modele;
 
 /** Classe mère abstraite : le polymorphisme se fait sur getType() et decrire(). */
 public abstract class Media {
