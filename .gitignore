@@ -15,4 +15,5 @@ db.properties
 # Identifiants locaux : ne jamais les versionner
 src/main/resources/db.properties
 *.db
+
 .idea/
