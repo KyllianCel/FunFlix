@@ -1,0 +1,4 @@
+utilisateur( <u>id_utilisateur</u> , nom, prenom,email, mot_de_passe_hash, telephone, role, actif, date_inscription)
+type_media ( <u>id_type</u>, <u>libelle</u>);
+media (<u>id_media</u>, titre, description, genre, auteur_editeur, annee, age_minimum, plateforme, nb_joueurs, nb_exemplaires,#id_type)
+emprunt (<u>id_emprunt</u>, #id_utilisateur, #id_media, date_emprunt, date_retour_prevue, date_retour_effective, prolonge, etat_retour)
