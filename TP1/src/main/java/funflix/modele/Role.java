@@ -1,4 +1,4 @@
-package funflix.modele;
+package funflix.model;
 
 public enum Role {
     ADHERENT,

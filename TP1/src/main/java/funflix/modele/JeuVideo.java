@@ -1,18 +1,27 @@
-package funflix.modele;
+package funflix.model;
 
 public class JeuVideo extends Media {
-    private final String plateforme;
+    private String plateforme;
 
-    public JeuVideo(int id, String titre, int nbExemplaires, int nbDisponibles, String plateforme) {
-        super(id, titre, nbExemplaires, nbDisponibles);
+    public JeuVideo() {
+        super();
+    }
+
+    public JeuVideo(int id, String titre, String description, String genre, String auteurEditeur, int annee, int ageMinimum, int nbExemplaires, int nbDisponibles, String plateforme) {
+        super(id, titre, description, genre, auteurEditeur, annee, ageMinimum, nbExemplaires, nbDisponibles);
         this.plateforme = plateforme;
     }
 
-    public String getPlateforme() { return plateforme; }
-
     @Override
-    public TypeMedia getType() { return TypeMedia.JEU_VIDEO; }
+    public String getType() {
+        return "Jeu vidéo";
+    }
 
-    @Override
-    public String decrire() { return "Jeu vidéo « " + getTitre() + " » sur " + plateforme; }
+    public String getPlateforme() {
+        return plateforme;
+    }
+
+    public void setPlateforme(String plateforme) {
+        this.plateforme = plateforme;
+    }
 }
