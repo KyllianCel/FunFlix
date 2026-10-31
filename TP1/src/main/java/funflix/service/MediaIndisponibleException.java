@@ -1,4 +1,4 @@
-package kit.service;
+package funflix.service;
 
 /** Exception métier : plus aucun exemplaire disponible. L'IHM l'affichera comme un message clair. */
 public class MediaIndisponibleException extends RuntimeException {

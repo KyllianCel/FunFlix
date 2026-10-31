@@ -1,10 +1,10 @@
-package kit.service;
+package funflix.service;
 
-import kit.bdd.ConnexionBD;
-import kit.bdd.DaoException;
-import kit.dao.EmpruntDao;
-import kit.dao.MediaDao;
-import kit.modele.Emprunt;
+import funflix.bdd.ConnexionBD;
+import funflix.bdd.DaoException;
+import funflix.dao.EmpruntDao;
+import funflix.dao.MediaDao;
+import funflix.modele.Emprunt;
 
 import java.sql.Connection;
 import java.sql.SQLException;

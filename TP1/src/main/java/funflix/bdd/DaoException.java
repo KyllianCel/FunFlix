@@ -1,4 +1,4 @@
-package kit.bdd;
+package funflix.bdd;
 
 /**
  * Exception non vérifiée qui enveloppe les erreurs SQL.

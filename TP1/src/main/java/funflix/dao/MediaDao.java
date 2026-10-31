@@ -1,11 +1,11 @@
-package kit.dao;
+package funflix.dao;
 
-import kit.bdd.ConnexionBD;
-import kit.bdd.DaoException;
-import kit.modele.JeuVideo;
-import kit.modele.Livre;
-import kit.modele.Media;
-import kit.modele.TypeMedia;
+import funflix.bdd.ConnexionBD;
+import funflix.bdd.DaoException;
+import funflix.modele.JeuVideo;
+import funflix.modele.Livre;
+import funflix.modele.Media;
+import funflix.modele.TypeMedia;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

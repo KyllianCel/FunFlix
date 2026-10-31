@@ -1,4 +1,4 @@
-package kit.securite;
+package funflix.securite;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
