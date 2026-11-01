@@ -5,6 +5,7 @@ import funflix.bdd.DaoException;
 import funflix.modele.Emprunt;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -45,7 +46,6 @@ public class EmpruntDao implements Dao<Emprunt> {
         }
     }
 
-    /** Emprunts non rendus d'un adhérent (utilise l'index idx_emprunt_utilisateur). */
     public List<Emprunt> trouverEnCours(int idUtilisateur) {
         String sql = "SELECT * FROM emprunt WHERE id_utilisateur = ? AND date_retour_effective IS NULL";
         List<Emprunt> resultat = new ArrayList<>();
@@ -71,15 +71,15 @@ public class EmpruntDao implements Dao<Emprunt> {
         }
     }
 
-    /** Variante transactionnelle : utilise la connexion de l'appelant, ne la ferme pas. */
     public int creer(Connection c, Emprunt e) {
-        String sql = "INSERT INTO emprunt (id_media, id_utilisateur, date_emprunt, date_retour_prevue) "
-                + "VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO emprunt (id_utilisateur, id_media, date_emprunt, date_retour_prevue, prolonge, etat_retour) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, e.getIdMedia());
-            ps.setInt(2, e.getIdUtilisateur());
-            ps.setString(3, e.getDateEmprunt().toString());      // LocalDate -> texte ISO
-            ps.setString(4, e.getDateRetourPrevue().toString());
+            ps.setInt(1, e.getIdUtilisateur());
+            ps.setInt(2, e.getIdMedia());
+            ps.setDate(3, Date.valueOf(e.getDateEmprunt()));
+            ps.setDate(4, Date.valueOf(e.getDateRetourPrevue()));
+            ps.setBoolean(5, e.isProlonge());
+            ps.setString(6, e.getEtatRetour());
             ps.executeUpdate();
             try (ResultSet cles = ps.getGeneratedKeys()) {
                 cles.next();
@@ -93,7 +93,7 @@ public class EmpruntDao implements Dao<Emprunt> {
     public void enregistrerRetour(Connection c, int idEmprunt, LocalDate dateRetour) {
         String sql = "UPDATE emprunt SET date_retour_effective = ? WHERE id = ?";
         try (PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, dateRetour.toString());
+            ps.setDate(1, Date.valueOf(dateRetour));
             ps.setInt(2, idEmprunt);
             ps.executeUpdate();
         } catch (SQLException ex) {
@@ -113,13 +113,16 @@ public class EmpruntDao implements Dao<Emprunt> {
     }
 
     private static Emprunt mapper(ResultSet rs) throws SQLException {
-        String retour = rs.getString("date_retour_effective"); // peut être NULL
+        Date retour = rs.getDate("date_retour_effective");
         return new Emprunt(
                 rs.getInt("id"),
-                rs.getInt("id_media"),
                 rs.getInt("id_utilisateur"),
-                LocalDate.parse(rs.getString("date_emprunt")),
-                LocalDate.parse(rs.getString("date_retour_prevue")),
-                retour == null ? null : LocalDate.parse(retour));
+                rs.getInt("id_media"),
+                rs.getDate("date_emprunt").toLocalDate(),
+                rs.getDate("date_retour_prevue").toLocalDate(),
+                retour != null ? retour.toLocalDate() : null,
+                rs.getBoolean("prolonge"),
+                rs.getString("etat_retour")
+        );
     }
 }

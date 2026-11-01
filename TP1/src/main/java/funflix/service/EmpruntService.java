@@ -1,6 +1,7 @@
 package funflix.service;
 
 import funflix.bdd.ConnexionBD;
+import funflix.dao.EmpruntDao;
 import funflix.modele.Emprunt;
 
 import java.sql.*;
@@ -8,8 +9,13 @@ import java.time.LocalDate;
 
 public class EmpruntService {
 
+    private final EmpruntDao empruntDao;
+
+    public EmpruntService(EmpruntDao empruntDao) {
+        this.empruntDao = empruntDao;
+    }
+
     public void emprunter(int idUtilisateur, int idMedia, int dureeJours) throws Exception {
-        // Règle C-02 : durée maximale de prêt <= 15 jours
         if (dureeJours <= 0 || dureeJours > 15) {
             throw new IllegalArgumentException("C-02 : La durée d'emprunt doit être comprise entre 1 et 15 jours.");
         }
@@ -17,7 +23,6 @@ public class EmpruntService {
         try (Connection conn = ConnexionBD.get()) {
             conn.setAutoCommit(false);
             try {
-                // 1. Vérifier Règle C-04 : compte actif
                 String sqlUser = "SELECT actif FROM utilisateur WHERE id = ?";
                 try (PreparedStatement ps = conn.prepareStatement(sqlUser)) {
                     ps.setInt(1, idUtilisateur);
@@ -28,7 +33,6 @@ public class EmpruntService {
                     }
                 }
 
-                // 2. Vérifier Règle C-01 : max 3 emprunts simultanés en cours
                 String sqlCountUser = "SELECT COUNT(*) FROM emprunt WHERE id_utilisateur = ? AND date_retour_effective IS NULL";
                 try (PreparedStatement ps = conn.prepareStatement(sqlCountUser)) {
                     ps.setInt(1, idUtilisateur);
@@ -39,7 +43,6 @@ public class EmpruntService {
                     }
                 }
 
-                // 3. Verrouiller le média et vérifier dynamiquement Règle C-03 (disponibilité > 0)
                 String sqlLockMedia = "SELECT nb_exemplaires FROM media WHERE id = ? FOR UPDATE";
                 int nbExemplaires;
                 try (PreparedStatement ps = conn.prepareStatement(sqlLockMedia)) {
@@ -67,11 +70,9 @@ public class EmpruntService {
                     throw new MediaIndisponibleException("C-03 : Aucun exemplaire disponible pour le média id=" + idMedia);
                 }
 
-                // 4. Insérer l'emprunt
-                String sqlInsert = """
-                    INSERT INTO emprunt (id_utilisateur, id_media, date_emprunt, date_retour_prevue, prolonge)
-                    VALUES (?, ?, ?, ?, FALSE)
-                    """;
+                // Remplacement du Text Block """ par une concaténation classique
+                String sqlInsert = "INSERT INTO emprunt (id_utilisateur, id_media, date_emprunt, date_retour_prevue, prolonge) " +
+                                   "VALUES (?, ?, ?, ?, FALSE)";
                 try (PreparedStatement ps = conn.prepareStatement(sqlInsert)) {
                     LocalDate aujourdhui = LocalDate.now();
                     ps.setInt(1, idUtilisateur);
@@ -88,6 +89,12 @@ public class EmpruntService {
             } finally {
                 conn.setAutoCommit(true);
             }
+        }
+    }
+
+    public void rendre(int idEmprunt) throws Exception {
+        try (Connection conn = ConnexionBD.get()) {
+            empruntDao.enregistrerRetour(conn, idEmprunt, LocalDate.now());
         }
     }
 }

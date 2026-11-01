@@ -6,6 +6,7 @@ import funflix.modele.Role;
 import funflix.modele.Utilisateur;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -59,14 +60,17 @@ public class UtilisateurDao implements Dao<Utilisateur> {
 
     @Override
     public int creer(Utilisateur u) {
-        String sql = "INSERT INTO utilisateur (email, nom, mdp_hash, sel, role) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO utilisateur (nom, prenom, email, mot_de_passe_hash, telephone, role, actif, date_inscription) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection c = ConnexionBD.get();
              PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, u.getEmail());
-            ps.setString(2, u.getNom());
-            ps.setString(3, u.getMdpHash());
-            ps.setString(4, u.getSel());
-            ps.setString(5, u.getRole().name());
+            ps.setString(1, u.getNom());
+            ps.setString(2, u.getPrenom());
+            ps.setString(3, u.getEmail());
+            ps.setString(4, u.getMotDePasseHash());
+            ps.setString(5, u.getTelephone());
+            ps.setString(6, u.getRole().name());
+            ps.setBoolean(7, u.isActif());
+            ps.setDate(8, Date.valueOf(u.getDateInscription()));
             ps.executeUpdate();
             try (ResultSet cles = ps.getGeneratedKeys()) {
                 cles.next();
@@ -88,14 +92,17 @@ public class UtilisateurDao implements Dao<Utilisateur> {
         }
     }
 
-    /** Convertit une ligne SQL en objet : le seul endroit qui connaît les noms de colonnes. */
     private static Utilisateur mapper(ResultSet rs) throws SQLException {
         return new Utilisateur(
                 rs.getInt("id"),
-                rs.getString("email"),
                 rs.getString("nom"),
-                rs.getString("mdp_hash"),
-                rs.getString("sel"),
-                Role.valueOf(rs.getString("role")));
+                rs.getString("prenom"),
+                rs.getString("email"),
+                rs.getString("mot_de_passe_hash"),
+                rs.getString("telephone"),
+                Role.valueOf(rs.getString("role")),
+                rs.getBoolean("actif"),
+                rs.getDate("date_inscription").toLocalDate()
+        );
     }
 }

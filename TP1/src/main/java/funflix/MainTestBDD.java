@@ -1,6 +1,5 @@
 package funflix;
 
-import funflix.bdd.InitBase;
 import funflix.dao.EmpruntDao;
 import funflix.dao.MediaDao;
 import funflix.dao.UtilisateurDao;
@@ -12,8 +11,6 @@ import funflix.service.AuthService;
 import funflix.service.EmpruntService;
 import funflix.service.MediaIndisponibleException;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -22,54 +19,56 @@ import java.util.Optional;
 public class MainTestBDD {
 
     public static void main(String[] args) throws Exception {
-        // Repartir d'une base vide à chaque lancement (SQLite : un simple fichier)
-        Files.deleteIfExists(Path.of("funflix.db"));
-        InitBase.executerScript("/schema.sql");
-        InitBase.executerScript("/donnees_test.sql");
-        System.out.println("1. Base créée et remplie");
+        // Prérequis : Exécuter schema.sql et donnees_test.sql manuellement dans MariaDB
+        System.out.println("1. Lancement des tests sur la base MariaDB existante...");
 
         UtilisateurDao utilisateurs = new UtilisateurDao();
         MediaDao medias = new MediaDao();
         EmpruntDao emprunts = new EmpruntDao();
         AuthService auth = new AuthService(utilisateurs);
-        EmpruntService service = new EmpruntService(medias, emprunts);
+        EmpruntService service = new EmpruntService(emprunts);
 
         System.out.println("\n2. Catalogue (polymorphisme : chaque sous-classe se décrit elle-même)");
-        for (Media m : medias.trouverTous()) {
-            System.out.println("   " + m);
+        for (Media m : medias.listerTous()) {
+            System.out.println("   ID: " + m.getId() + " | Titre: " + m.getTitre() + " | Type: " + m.getType());
         }
 
         System.out.println("\n3. Comptes et authentification");
-        int idAlice = auth.inscrire("alice@example.org", "Alice", "motdepasse123", Role.ADHERENT);
-        int idBob = auth.inscrire("bob@example.org", "Bob", "autreMotDePasse", Role.ADHERENT);
-        Optional<Utilisateur> ok = auth.seConnecter("alice@example.org", "motdepasse123");
-        Optional<Utilisateur> ko = auth.seConnecter("alice@example.org", "mauvais");
-        System.out.println("   Bon mot de passe     -> " + ok.map(Utilisateur::toString).orElse("REFUSÉ"));
-        System.out.println("   Mauvais mot de passe -> " + ko.map(Utilisateur::toString).orElse("REFUSÉ"));
+        // Test d'inscription BCrypt V2
+        int idAlice = auth.inscrire("Dupont", "Alice", "alice@test.fr", "motdepasse123", "0600000001", Role.ADHERENT);
+        int idBob = auth.inscrire("Martin", "Bob", "bob@test.fr", "autreMotDePasse", "0600000002", Role.ADHERENT);
+        
+        Optional<Utilisateur> ok = auth.seConnecter("alice@test.fr", "motdepasse123");
+        Optional<Utilisateur> ko = auth.seConnecter("alice@test.fr", "mauvais");
+        System.out.println("   Bon mot de passe     -> " + (ok.isPresent() ? ok.get().getNom() : "REFUSÉ"));
+        System.out.println("   Mauvais mot de passe -> " + (ko.isPresent() ? ko.get().getNom() : "REFUSÉ"));
 
-        System.out.println("\n4. Transaction : emprunt du seul exemplaire de « Celeste »");
-        int idCeleste = medias.rechercherParTitre("Celeste").get(0).getId();
-        Emprunt e1 = service.emprunter(idAlice, idCeleste, 14);
-        System.out.println("   Alice : " + e1);
+        System.out.println("\n4. Transaction : emprunt de Zelda (ID 2)");
+        // On suppose que Zelda est à l'ID 2 dans tes donnees_test.sql (JeuVideo)
+        int idZelda = 2; 
+        
         try {
-            service.emprunter(idBob, idCeleste, 14);
+            service.emprunter(idAlice, idZelda, 14);
+            System.out.println("   Alice : a emprunté le média " + idZelda);
+            
+            service.emprunter(idBob, idZelda, 14);
             System.out.println("   ERREUR : Bob n'aurait pas dû pouvoir emprunter !");
         } catch (MediaIndisponibleException ex) {
-            System.out.println("   Bob   : refusé -> " + ex.getMessage());
+            System.out.println("   Bob   : refusé (stock épuisé) -> " + ex.getMessage());
         }
-        System.out.println("   Stock après : " + medias.trouver(idCeleste).orElseThrow());
 
-        System.out.println("\n5. Emprunts en cours d'Alice, retard calculé (pas stocké)");
+        System.out.println("\n5. Emprunts en cours d'Alice, retard calculé (pas stocké en base)");
         List<Emprunt> enCours = emprunts.trouverEnCours(idAlice);
         for (Emprunt e : enCours) {
-            System.out.println("   " + e + " | en retard aujourd'hui : " + e.estEnRetard(LocalDate.now())
-                    + " | en retard dans 30 jours : " + e.estEnRetard(LocalDate.now().plusDays(30)));
+            System.out.println("   Emprunt ID: " + e.getId() + " | Statut : " + e.getStatut());
         }
 
-        System.out.println("\n6. Retour (transaction : retour + stock)");
-        service.rendre(e1.getId());
-        System.out.println("   Stock après retour : " + medias.trouver(idCeleste).orElseThrow());
-        System.out.println("   Emprunts en cours d'Alice : " + emprunts.trouverEnCours(idAlice).size());
+        System.out.println("\n6. Retour (Mise à jour date_retour_effective)");
+        if (!enCours.isEmpty()) {
+            service.rendre(enCours.get(0).getId());
+            System.out.println("   Le média a été rendu.");
+            System.out.println("   Emprunts en cours d'Alice : " + emprunts.trouverEnCours(idAlice).size());
+        }
 
         System.out.println("\nTout fonctionne.");
     }

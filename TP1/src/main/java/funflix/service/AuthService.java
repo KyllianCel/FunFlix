@@ -5,6 +5,7 @@ import funflix.modele.Role;
 import funflix.modele.Utilisateur;
 import funflix.securite.Hacheur;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 public class AuthService {
@@ -14,19 +15,18 @@ public class AuthService {
         this.utilisateurs = utilisateurs;
     }
 
-    /** Crée un compte : le sel est généré ici, le mot de passe en clair n'est jamais conservé. */
-    public int inscrire(String email, String nom, String motDePasse, Role role) {
-        String sel = Hacheur.genererSel();
-        String hash = Hacheur.hacher(motDePasse, sel);
-        return utilisateurs.creer(new Utilisateur(0, email, nom, hash, sel, role));
+    /** Crée un compte : le hash BCrypt inclut automatiquement son propre sel. */
+    public int inscrire(String nom, String prenom, String email, String motDePasse, String telephone, Role role) {
+        String hash = Hacheur.hacher(motDePasse); // Hacheur doit avoir la méthode BCrypt hacher(mdp)
+        Utilisateur u = new Utilisateur(0, nom, prenom, email, hash, telephone, role, true, LocalDate.now());
+        return utilisateurs.creer(u);
     }
 
     /**
      * Retourne l'utilisateur si les identifiants sont bons, sinon Optional.empty().
-     * Même résultat pour « email inconnu » et « mauvais mot de passe » : on ne renseigne pas l'attaquant.
      */
     public Optional<Utilisateur> seConnecter(String email, String motDePasse) {
         return utilisateurs.trouverParEmail(email)
-                .filter(u -> Hacheur.verifier(motDePasse, u.getSel(), u.getMdpHash()));
+                .filter(u -> u.verifierMotDePasse(motDePasse));
     }
 }

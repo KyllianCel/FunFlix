@@ -1,12 +1,12 @@
-CREATE DATABASE IF NOT EXISTS base_projet;
-USE base_projet;
+CREATE DATABASE IF NOT EXISTS ludotheque;
+USE ludotheque;
 
 DROP TABLE IF EXISTS jeu_societe;
 DROP TABLE IF EXISTS jeu_video;
 DROP TABLE IF EXISTS emprunt;
 DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS media;
-DROP TABLE IF EXISTS Type_media;
+DROP TABLE IF EXISTS type_media;
 DROP TABLE IF EXISTS utilisateur;
 
 
@@ -17,12 +17,12 @@ CREATE TABLE utilisateur (
                              email VARCHAR(255) NOT NULL UNIQUE,
                              mot_de_passe_hash VARCHAR(255) NOT NULL,
                              telephone VARCHAR(20),
-                             role VARCHAR(50) NOT NULL CHECK ( role IN ('Administrateur','Client')),
+                             role VARCHAR(50) NOT NULL CHECK ( role IN ('ADMIN','ADHERENT')),
                              actif BOOLEAN NOT NULL,
                              date_inscription DATE NOT NULL
 );
 
-CREATE TABLE Type_media (
+CREATE TABLE type_media (
     id_type INT AUTO_INCREMENT PRIMARY KEY,
     Libelle VARCHAR(50) NOT NULL
 );
@@ -37,7 +37,7 @@ CREATE TABLE media (
                        age_minimum INT,
                        nb_exemplaires INT NOT NULL,
                        id_type INT not null,
-                    FOREIGN KEY (id_type) references Type_media(id_type)
+                    FOREIGN KEY (id_type) references type_media(id_type)
 );
 
 CREATE TABLE emprunt (

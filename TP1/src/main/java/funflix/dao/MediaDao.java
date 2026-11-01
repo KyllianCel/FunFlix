@@ -10,11 +10,12 @@ import java.util.List;
 
 public class MediaDao {
 
-    private static final String SQL_SELECT_BASE = """
-        SELECT m.*, t.libelle AS type_libelle
-        FROM media m
-        JOIN type_media t ON m.id_type = t.id
-        """;
+	private static final String SQL_SELECT_BASE = 
+	        "SELECT m.*, t.libelle AS type_libelle, jv.plateforme, js.nb_personnes " +
+	        "FROM media m " +
+	        "JOIN type_media t ON m.id_type = t.id " +
+	        "LEFT JOIN jeu_video jv ON m.id = jv.id " +
+	        "LEFT JOIN jeu_societe js ON m.id = js.id";
 
     public Media trouverParId(int id) {
         String sql = SQL_SELECT_BASE + " WHERE m.id = ?";
@@ -43,17 +44,14 @@ public class MediaDao {
         return liste;
     }
 
-    /**
-     * Calcule dynamiquement le nombre d'exemplaires disponibles (3FN : exemplaires - emprunts actifs).
-     */
     public int compterDisponibles(Connection c, int idMedia) throws SQLException {
-        String sql = """
-            SELECT m.nb_exemplaires - COUNT(e.id) AS disponibles
-            FROM media m
-            LEFT JOIN emprunt e ON m.id = e.id_media AND e.date_retour_effective IS NULL
-            WHERE m.id = ?
-            GROUP BY m.id, m.nb_exemplaires
-            """;
+        String sql = 
+            "SELECT m.nb_exemplaires - COUNT(e.id) AS disponibles " +
+            "FROM media m " +
+            "LEFT JOIN emprunt e ON m.id = e.id_media AND e.date_retour_effective IS NULL " +
+            "WHERE m.id = ? " +
+            "GROUP BY m.id, m.nb_exemplaires";
+            
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, idMedia);
             try (ResultSet rs = ps.executeQuery()) {
@@ -65,7 +63,6 @@ public class MediaDao {
         }
     }
 
-    // Factory qui instancie la bonne sous-classe selon la table type_media
     private Media mapper(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
         String titre = rs.getString("titre");
