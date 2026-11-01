@@ -4,12 +4,7 @@ import funflix.bdd.ConnexionBD;
 import funflix.bdd.DaoException;
 import funflix.modele.Emprunt;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +14,7 @@ public class EmpruntDao implements Dao<Emprunt> {
 
     @Override
     public Optional<Emprunt> trouver(int id) {
-        String sql = "SELECT * FROM emprunt WHERE id = ?";
+        String sql = "SELECT * FROM emprunt WHERE id_emprunt = ?";
         try (Connection c = ConnexionBD.get(); PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -91,7 +86,7 @@ public class EmpruntDao implements Dao<Emprunt> {
     }
 
     public void enregistrerRetour(Connection c, int idEmprunt, LocalDate dateRetour) {
-        String sql = "UPDATE emprunt SET date_retour_effective = ? WHERE id = ?";
+        String sql = "UPDATE emprunt SET date_retour_effective = ? WHERE id_emprunt = ?";
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setDate(1, Date.valueOf(dateRetour));
             ps.setInt(2, idEmprunt);
@@ -103,7 +98,7 @@ public class EmpruntDao implements Dao<Emprunt> {
 
     @Override
     public void supprimer(int id) {
-        String sql = "DELETE FROM emprunt WHERE id = ?";
+        String sql = "DELETE FROM emprunt WHERE id_emprunt = ?";
         try (Connection c = ConnexionBD.get(); PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();
@@ -115,7 +110,7 @@ public class EmpruntDao implements Dao<Emprunt> {
     private static Emprunt mapper(ResultSet rs) throws SQLException {
         Date retour = rs.getDate("date_retour_effective");
         return new Emprunt(
-                rs.getInt("id"),
+                rs.getInt("id_emprunt"),
                 rs.getInt("id_utilisateur"),
                 rs.getInt("id_media"),
                 rs.getDate("date_emprunt").toLocalDate(),

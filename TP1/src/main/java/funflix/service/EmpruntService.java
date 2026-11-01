@@ -2,7 +2,6 @@ package funflix.service;
 
 import funflix.bdd.ConnexionBD;
 import funflix.dao.EmpruntDao;
-import funflix.modele.Emprunt;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -23,7 +22,7 @@ public class EmpruntService {
         try (Connection conn = ConnexionBD.get()) {
             conn.setAutoCommit(false);
             try {
-                String sqlUser = "SELECT actif FROM utilisateur WHERE id = ?";
+                String sqlUser = "SELECT actif FROM utilisateur WHERE id_utilisateur = ?";
                 try (PreparedStatement ps = conn.prepareStatement(sqlUser)) {
                     ps.setInt(1, idUtilisateur);
                     try (ResultSet rs = ps.executeQuery()) {
@@ -43,7 +42,7 @@ public class EmpruntService {
                     }
                 }
 
-                String sqlLockMedia = "SELECT nb_exemplaires FROM media WHERE id = ? FOR UPDATE";
+                String sqlLockMedia = "SELECT nb_exemplaires FROM media WHERE id_media = ? FOR UPDATE";
                 int nbExemplaires;
                 try (PreparedStatement ps = conn.prepareStatement(sqlLockMedia)) {
                     ps.setInt(1, idMedia);
@@ -70,7 +69,6 @@ public class EmpruntService {
                     throw new MediaIndisponibleException("C-03 : Aucun exemplaire disponible pour le média id=" + idMedia);
                 }
 
-                // Remplacement du Text Block """ par une concaténation classique
                 String sqlInsert = "INSERT INTO emprunt (id_utilisateur, id_media, date_emprunt, date_retour_prevue, prolonge) " +
                                    "VALUES (?, ?, ?, ?, FALSE)";
                 try (PreparedStatement ps = conn.prepareStatement(sqlInsert)) {

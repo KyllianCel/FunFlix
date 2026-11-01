@@ -5,12 +5,7 @@ import funflix.bdd.DaoException;
 import funflix.modele.Role;
 import funflix.modele.Utilisateur;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +14,7 @@ public class UtilisateurDao implements Dao<Utilisateur> {
 
     @Override
     public Optional<Utilisateur> trouver(int id) {
-        String sql = "SELECT * FROM utilisateur WHERE id = ?";
+        String sql = "SELECT * FROM utilisateur WHERE id_utilisateur = ?";
         try (Connection c = ConnexionBD.get(); PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -83,7 +78,7 @@ public class UtilisateurDao implements Dao<Utilisateur> {
 
     @Override
     public void supprimer(int id) {
-        String sql = "DELETE FROM utilisateur WHERE id = ?";
+        String sql = "DELETE FROM utilisateur WHERE id_utilisateur = ?";
         try (Connection c = ConnexionBD.get(); PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();
@@ -94,7 +89,7 @@ public class UtilisateurDao implements Dao<Utilisateur> {
 
     private static Utilisateur mapper(ResultSet rs) throws SQLException {
         return new Utilisateur(
-                rs.getInt("id"),
+                rs.getInt("id_utilisateur"),
                 rs.getString("nom"),
                 rs.getString("prenom"),
                 rs.getString("email"),
