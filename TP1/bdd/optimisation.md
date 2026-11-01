@@ -47,3 +47,20 @@ CREATE INDEX idx_media_type_genre ON media(id_type, genre);
 **EXPLAIN APRÈS l'indexation :**
 * **Type de jointure :** `ref`. 
 * **Résultat :** La base utilise l'index `idx_media_type_genre`, permettant de récupérer instantanément les médias ciblés sans lire le reste du catalogue.
+
+
+---
+
+## 3. Déportation de la logique métier au niveau SGBD
+
+Pour consolider notre architecture, nous avons ajouté dans le schéma de base de données des vues et triggers afin de garantir la sécurité et la cohérence des données, indépendamment du code Java.
+
+### A. Création de Vues (Views)
+Des vues ont été mises en place pour simplifier et optimiser les requêtes de lecture complexes :
+* **`vue_emprunts_en_retard`** : Permet d'identifier immédiatement les adhérents en retard et calcule dynamiquement le nombre de jours de retard sans alourdir le code applicatif.
+* **`vue_media_disponibilite`** : Simplifie l'affichage du catalogue en pré-calculant le stock réel disponible (Soustraction des emprunts en cours au nombre d'exemplaires total).
+
+### B. Création de Déclencheurs (Triggers)
+Pour garantir l'intégrité des règles métier, nous avons implémenté des Triggers. Cela évite toute incohérence si une autre application ou un administrateur venait à interagir directement avec la base de données :
+* **`trg_verif_limite_emprunts`** : Bloque automatiquement au niveau du SGBD toute insertion d'emprunt si l'utilisateur a déjà atteint la limite stricte de 3 emprunts simultanés en cours.
+* **`trg_verif_compte_actif`** : Empêche un utilisateur dont le compte a été désactivé de réaliser un nouvel emprunt.
