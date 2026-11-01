@@ -1,4 +1,4 @@
-package funflix.model;
+package funflix.modele;
 
 public enum StatutEmprunt {
     EN_COURS,

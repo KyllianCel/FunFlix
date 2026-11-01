@@ -2,136 +2,87 @@ package funflix.dao;
 
 import funflix.bdd.ConnexionBD;
 import funflix.bdd.DaoException;
-import funflix.modele.JeuVideo;
-import funflix.modele.Livre;
-import funflix.modele.Media;
-import funflix.modele.TypeMedia;
+import funflix.modele.*;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-public class MediaDao implements Dao<Media> {
+public class MediaDao {
 
-    @Override
-    public Optional<Media> trouver(int id) {
-        String sql = "SELECT * FROM media WHERE id = ?";
-        try (Connection c = ConnexionBD.get(); PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next() ? Optional.of(mapper(rs)) : Optional.empty();
-            }
-        } catch (SQLException e) {
-            throw new DaoException("Lecture du média " + id + " impossible", e);
-        }
-    }
+    private static final String SQL_SELECT_BASE = """
+        SELECT m.*, t.libelle AS type_libelle
+        FROM media m
+        JOIN type_media t ON m.id_type = t.id
+        """;
 
-    @Override
-    public List<Media> trouverTous() {
-        return rechercherParTitre("");
-    }
-
-    /** Exemple de recherche : LIKE avec un paramètre, jamais de concaténation dans le SQL. */
-    public List<Media> rechercherParTitre(String morceau) {
-        String sql = "SELECT * FROM media WHERE titre LIKE ? ORDER BY titre";
-        List<Media> resultat = new ArrayList<>();
-        try (Connection c = ConnexionBD.get(); PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, "%" + morceau + "%");
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    resultat.add(mapper(rs));
-                }
-            }
-            return resultat;
-        } catch (SQLException e) {
-            throw new DaoException("Recherche de médias impossible", e);
-        }
-    }
-
-    @Override
-    public int creer(Media m) {
-        String sql = "INSERT INTO media (titre, type, plateforme, nb_pages, nb_exemplaires, nb_disponibles) "
-                + "VALUES (?, ?, ?, ?, ?, ?)";
+    public Media trouverParId(int id) {
+        String sql = SQL_SELECT_BASE + " WHERE m.id = ?";
         try (Connection c = ConnexionBD.get();
-             PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, m.getTitre());
-            ps.setString(2, m.getType().name());
-            // Colonnes propres à une sous-classe : NULL pour les autres types
-            if (m instanceof JeuVideo j) {
-                ps.setString(3, j.getPlateforme());
-            } else {
-                ps.setNull(3, Types.VARCHAR);
-            }
-            if (m instanceof Livre l) {
-                ps.setInt(4, l.getNbPages());
-            } else {
-                ps.setNull(4, Types.INTEGER);
-            }
-            ps.setInt(5, m.getNbExemplaires());
-            ps.setInt(6, m.getNbDisponibles());
-            ps.executeUpdate();
-            try (ResultSet cles = ps.getGeneratedKeys()) {
-                cles.next();
-                return cles.getInt(1);
-            }
-        } catch (SQLException e) {
-            throw new DaoException("Création du média impossible", e);
-        }
-    }
-
-    @Override
-    public void supprimer(int id) {
-        String sql = "DELETE FROM media WHERE id = ?";
-        try (Connection c = ConnexionBD.get(); PreparedStatement ps = c.prepareStatement(sql)) {
+             PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, id);
-            ps.executeUpdate();
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? mapper(rs) : null;
+            }
         } catch (SQLException e) {
-            throw new DaoException("Suppression du média impossible (encore emprunté ?)", e);
+            throw new DaoException("Erreur lecture média id=" + id, e);
         }
     }
 
-    // ---- Variantes TRANSACTIONNELLES : la connexion est fournie par l'appelant (le service) ----
+    public List<Media> listerTous() {
+        List<Media> liste = new ArrayList<>();
+        try (Connection c = ConnexionBD.get();
+             PreparedStatement ps = c.prepareStatement(SQL_SELECT_BASE);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                liste.add(mapper(rs));
+            }
+        } catch (SQLException e) {
+            throw new DaoException("Erreur listage des médias", e);
+        }
+        return liste;
+    }
 
     /**
-     * UPDATE conditionnel : réussit seulement s'il reste un exemplaire.
-     * Deux emprunts simultanés du dernier exemplaire : un seul obtient 1 ligne modifiée.
+     * Calcule dynamiquement le nombre d'exemplaires disponibles (3FN : exemplaires - emprunts actifs).
      */
-    public boolean retirerExemplaire(Connection c, int idMedia) {
-        String sql = "UPDATE media SET nb_disponibles = nb_disponibles - 1 WHERE id = ? AND nb_disponibles > 0";
+    public int compterDisponibles(Connection c, int idMedia) throws SQLException {
+        String sql = """
+            SELECT m.nb_exemplaires - COUNT(e.id) AS disponibles
+            FROM media m
+            LEFT JOIN emprunt e ON m.id = e.id_media AND e.date_retour_effective IS NULL
+            WHERE m.id = ?
+            GROUP BY m.id, m.nb_exemplaires
+            """;
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, idMedia);
-            return ps.executeUpdate() == 1;
-        } catch (SQLException e) {
-            throw new DaoException("Mise à jour du stock impossible", e);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    throw new SQLException("Média introuvable : id=" + idMedia);
+                }
+                return rs.getInt("disponibles");
+            }
         }
     }
 
-    public void rendreExemplaire(Connection c, int idMedia) {
-        String sql = "UPDATE media SET nb_disponibles = nb_disponibles + 1 WHERE id = ?";
-        try (PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, idMedia);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new DaoException("Mise à jour du stock impossible", e);
-        }
-    }
-
-    /** Factory : choisit la bonne sous-classe d'après la colonne type. */
-    private static Media mapper(ResultSet rs) throws SQLException {
-        TypeMedia type = TypeMedia.valueOf(rs.getString("type"));
+    // Factory qui instancie la bonne sous-classe selon la table type_media
+    private Media mapper(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
         String titre = rs.getString("titre");
-        int total = rs.getInt("nb_exemplaires");
-        int dispo = rs.getInt("nb_disponibles");
+        String desc = rs.getString("description");
+        String genre = rs.getString("genre");
+        String auteur = rs.getString("auteur_editeur");
+        int annee = rs.getInt("annee");
+        int ageMin = rs.getInt("age_minimum");
+        int nbEx = rs.getInt("nb_exemplaires");
+        String type = rs.getString("type_libelle");
+
         return switch (type) {
-            case JEU_VIDEO -> new JeuVideo(id, titre, total, dispo, rs.getString("plateforme"));
-            case LIVRE -> new Livre(id, titre, total, dispo, rs.getInt("nb_pages"));
+            case "JEU_VIDEO" -> new JeuVideo(id, titre, desc, genre, auteur, annee, ageMin, nbEx, rs.getString("plateforme"));
+            case "JEU_SOCIETE" -> new JeuSociete(id, titre, desc, genre, auteur, annee, ageMin, nbEx, rs.getString("nb_joueurs"));
+            case "BANDE_DESSINEE" -> new BandeDessinee(id, titre, desc, genre, auteur, annee, ageMin, nbEx);
+            case "MANGA" -> new Manga(id, titre, desc, genre, auteur, annee, ageMin, nbEx);
+            default -> throw new IllegalArgumentException("Type de média inconnu : " + type);
         };
     }
 }
