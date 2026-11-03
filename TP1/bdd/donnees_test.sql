@@ -1,16 +1,16 @@
 USE ludotheque;
 
 INSERT INTO utilisateur (nom, prenom, email, mot_de_passe_hash, telephone, role, actif, date_inscription) VALUES
-                                                                                                              ('Martin',  'Claire',  'claire.martin@mail.fr',  '$2y$10$hash_claire_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',  '0612345678', 'ADMIN', TRUE,  '2025-09-01'),
-                                                                                                              ('Dubois',  'Thomas',  'thomas.dubois@mail.fr',  '$2y$10$hash_thomas_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',  '0623456789', 'ADMIN', TRUE,  '2025-09-01'),
-                                                                                                              ('Leroy',   'Emma',    'emma.leroy@mail.fr',     '$2y$10$hash_emma_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',   '0634567890', 'ADHERENT',         TRUE,  '2025-10-12'),
-                                                                                                              ('Moreau',  'Lucas',   'lucas.moreau@mail.fr',   '$2y$10$hash_lucas_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',   '0645678901', 'ADHERENT',         TRUE,  '2025-11-03'),
-                                                                                                              ('Simon',   'Léa',     'lea.simon@mail.fr',      '$2y$10$hash_lea_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',   NULL,         'ADHERENT',         TRUE,  '2025-11-20'),
-                                                                                                              ('Laurent', 'Hugo',    'hugo.laurent@mail.fr',   '$2y$10$hash_hugo_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',   '0667890123', 'ADHERENT',         TRUE,  '2026-01-08'),
-                                                                                                              ('Michel',  'Chloé',   'chloe.michel@mail.fr',   '$2y$10$hash_chloe_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',   '0678901234', 'ADHERENT',         TRUE,  '2026-02-14'),
-                                                                                                              ('Garcia',  'Nathan',  'nathan.garcia@mail.fr',  '$2y$10$hash_nathan_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',   '0689012345', 'ADHERENT',         FALSE, '2026-03-02'),
-                                                                                                              ('Roux',    'Inès',    'ines.roux@mail.fr',      '$2y$10$hash_ines_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',   '0690123456', 'ADHERENT',         TRUE,  '2026-05-19'),
-                                                                                                              ('Fournier','Maxime',  'maxime.fournier@mail.fr','$2y$10$hash_maxime_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',   '0601234567', 'ADHERENT',         TRUE,  '2026-09-10');
+                                                                                                              ('Martin',  'Claire',  'claire.martin@mail.fr',  '$2a$12$Aq5N8l3DMAky92NvvJKmLuj5Hj5NAIeOrJcpH02HZPRHAdfigZywK',  '0612345678', 'ADMIN', TRUE,  '2025-09-01'),
+                                                                                                              ('Dubois',  'Thomas',  'thomas.dubois@mail.fr',  '$2a$12$Aq5N8l3DMAky92NvvJKmLuj5Hj5NAIeOrJcpH02HZPRHAdfigZywK',  '0623456789', 'ADMIN', TRUE,  '2025-09-01'),
+                                                                                                              ('Leroy',   'Emma',    'emma.leroy@mail.fr',     '$2a$12$Aq5N8l3DMAky92NvvJKmLuj5Hj5NAIeOrJcpH02HZPRHAdfigZywK',   '0634567890', 'ADHERENT',         TRUE,  '2025-10-12'),
+                                                                                                              ('Moreau',  'Lucas',   'lucas.moreau@mail.fr',   '$2a$12$Aq5N8l3DMAky92NvvJKmLuj5Hj5NAIeOrJcpH02HZPRHAdfigZywK',   '0645678901', 'ADHERENT',         TRUE,  '2025-11-03'),
+                                                                                                              ('Simon',   'Léa',     'lea.simon@mail.fr',      '$2a$12$Aq5N8l3DMAky92NvvJKmLuj5Hj5NAIeOrJcpH02HZPRHAdfigZywK',   NULL,         'ADHERENT',         TRUE,  '2025-11-20'),
+                                                                                                              ('Laurent', 'Hugo',    'hugo.laurent@mail.fr',   '$2a$12$Aq5N8l3DMAky92NvvJKmLuj5Hj5NAIeOrJcpH02HZPRHAdfigZywK',   '0667890123', 'ADHERENT',         TRUE,  '2026-01-08'),
+                                                                                                              ('Michel',  'Chloé',   'chloe.michel@mail.fr',   '$2a$12$Aq5N8l3DMAky92NvvJKmLuj5Hj5NAIeOrJcpH02HZPRHAdfigZywK',   '0678901234', 'ADHERENT',         TRUE,  '2026-02-14'),
+                                                                                                              ('Garcia',  'Nathan',  'nathan.garcia@mail.fr',  '$2a$12$Aq5N8l3DMAky92NvvJKmLuj5Hj5NAIeOrJcpH02HZPRHAdfigZywK',   '0689012345', 'ADHERENT',         FALSE, '2026-03-02'),
+                                                                                                              ('Roux',    'Inès',    'ines.roux@mail.fr',      '$2a$12$Aq5N8l3DMAky92NvvJKmLuj5Hj5NAIeOrJcpH02HZPRHAdfigZywK',   '0690123456', 'ADHERENT',         TRUE,  '2026-05-19'),
+                                                                                                              ('Fournier','Maxime',  'maxime.fournier@mail.fr','$2a$12$Aq5N8l3DMAky92NvvJKmLuj5Hj5NAIeOrJcpH02HZPRHAdfigZywK',   '0601234567', 'ADHERENT',         TRUE,  '2026-09-10');
 
 
 INSERT INTO type_media (Libelle) VALUES
@@ -18,7 +18,7 @@ INSERT INTO type_media (Libelle) VALUES
 
 
 INSERT INTO media (titre, description, genre, auteur_editeur, annee, age_minimum, nb_exemplaires, id_type) VALUES
-('The Legend of Zelda: Breath of the Wild', 'Exploration en monde ouvert à Hyrule.', 'Aventure', 'Nintendo', 2017, 12, 2, 1),
+('The Legend of Zelda: Breath of the Wild', 'Exploration en monde ouvert à Hyrule.', 'Aventure', 'Nintendo', 2017, 12, 1, 1),
 ('EA Sports FC 24', 'Simulation de football.', 'Sport', 'EA Sports', 2023, 3, 3, 1),
 ('Elden Ring', 'Action-RPG dans les Terres Intermédiaires.', 'RPG', 'FromSoftware', 2022, 16, 1, 1),
 ('Mario Kart 8 Deluxe', 'Course arcade entre amis.', 'Course', 'Nintendo', 2017, 3, 3, 1),

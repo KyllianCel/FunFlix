@@ -44,8 +44,8 @@ public class MainTestBDD {
         System.out.println("   Mauvais mot de passe -> " + (ko.isPresent() ? ko.get().getNom() : "REFUSÉ"));
 
         System.out.println("\n4. Transaction : emprunt de Zelda (ID 2)");
-        // On suppose que Zelda est à l'ID 2 dans donnees_test.sql
-        int idZelda = 2; 
+        // On suppose que Zelda est à l'ID 1 dans donnees_test.sql
+        int idZelda = 1; 
         
         try {
             service.emprunter(idAlice, idZelda, 14);

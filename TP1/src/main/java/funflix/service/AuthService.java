@@ -9,24 +9,30 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 public class AuthService {
-    private final UtilisateurDao utilisateurs;
 
-    public AuthService(UtilisateurDao utilisateurs) {
-        this.utilisateurs = utilisateurs;
+    // 1. Déclaration de la dépendance
+    private final UtilisateurDao utilisateurDao;
+
+    // 2. Initialisation via le constructeur
+    public AuthService(UtilisateurDao utilisateurDao) {
+        this.utilisateurDao = utilisateurDao;
     }
 
-    /** Crée un compte : le hash BCrypt inclut automatiquement son propre sel. */
-    public int inscrire(String nom, String prenom, String email, String motDePasse, String telephone, Role role) {
-        String hash = Hacheur.hacher(motDePasse); // Hacheur doit avoir la méthode BCrypt hacher(mdp)
-        Utilisateur u = new Utilisateur(0, nom, prenom, email, hash, telephone, role, true, LocalDate.now());
-        return utilisateurs.creer(u);
+    public int inscrire(String nom, String prenom, String email, String mdp, String tel, Role role) {
+        // Hachage du mot de passe en clair avant l'insertion en BDD
+        String hash = Hacheur.hacher(mdp); 
+        
+        Utilisateur u = new Utilisateur(0, nom, prenom, email, hash, tel, role, true, LocalDate.now());
+        return utilisateurDao.creer(u);
     }
 
-    /**
-     * Retourne l'utilisateur si les identifiants sont bons, sinon Optional.empty().
-     */
-    public Optional<Utilisateur> seConnecter(String email, String motDePasse) {
-        return utilisateurs.trouverParEmail(email)
-                .filter(u -> u.verifierMotDePasse(motDePasse));
+    public Optional<Utilisateur> seConnecter(String email, String mdp) {
+        Optional<Utilisateur> opt = utilisateurDao.trouverParEmail(email);
+        
+        // Vérification Bcrypt entre le mot de passe tapé et le hash stocké
+        if (opt.isPresent() && Hacheur.verifier(mdp, opt.get().getMotDePasseHash())) {
+            return opt;
+        }
+        return Optional.empty();
     }
 }
