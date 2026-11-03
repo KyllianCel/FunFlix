@@ -10,6 +10,6 @@ public class BandeDessinee extends Media {
 
     @Override
     public String getType() {
-        return TypeMedia.BANDE_DESSINEE.name();
+        return "BANDE_DESSINEE";
     }
 }

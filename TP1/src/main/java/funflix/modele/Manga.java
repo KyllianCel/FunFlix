@@ -10,6 +10,6 @@ public class Manga extends Media {
 
     @Override
     public String getType() {
-        return TypeMedia.MANGA.name();
+        return "MANGA";
     }
 }

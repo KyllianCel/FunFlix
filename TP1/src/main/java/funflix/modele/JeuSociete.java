@@ -12,7 +12,7 @@ public class JeuSociete extends Media {
 
     @Override
     public String getType() {
-        return TypeMedia.JEU_SOCIETE.name();
+        return "JEU_SOCIETE";
     }
 
     public String getNbJoueurs() { return nbJoueurs; }

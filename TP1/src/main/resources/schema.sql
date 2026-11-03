@@ -74,3 +74,83 @@ CREATE TABLE jeu_societe (
     nb_personnes INT NOT NULL,
     FOREIGN KEY (id) references media(id_media)
 );
+
+-- INDEX
+CREATE INDEX idx_media_type_genre ON media(id_type, genre);
+CREATE INDEX idx_emprunt_media_actif ON emprunt(id_media, date_retour_effective);
+CREATE INDEX idx_emprunt_user_actif ON emprunt(id_utilisateur, date_retour_effective);
+
+
+-- VUES
+
+-- 1. Vue pour afficher le catalogue avec le calcul dynamique des stocks
+CREATE OR REPLACE VIEW vue_media_disponibilite AS
+SELECT 
+    m.id_media,
+    m.titre,
+    t.libelle AS type_media,
+    m.nb_exemplaires,
+    (m.nb_exemplaires - COALESCE(COUNT(e.id_emprunt), 0)) AS nb_disponibles
+FROM media m
+JOIN type_media t ON m.id_type = t.id_type
+LEFT JOIN emprunt e ON m.id_media = e.id_media AND e.date_retour_effective IS NULL
+GROUP BY m.id_media, m.titre, t.libelle, m.nb_exemplaires;
+
+
+-- 2. Vue pour identifier immédiatement les adhérents en retard
+CREATE OR REPLACE VIEW vue_emprunts_en_retard AS
+SELECT 
+    e.id_emprunt,
+    u.nom,
+    u.prenom,
+    u.email,
+    m.titre,
+    e.date_retour_prevue,
+    DATEDIFF(CURRENT_DATE, e.date_retour_prevue) AS jours_de_retard
+FROM emprunt e
+JOIN utilisateur u ON e.id_utilisateur = u.id_utilisateur
+JOIN media m ON e.id_media = m.id_media
+WHERE e.date_retour_effective IS NULL 
+AND e.date_retour_prevue < CURRENT_DATE;
+
+-- TRIGGERS
+
+DELIMITER //
+
+-- 1. Trigger : Bloquer l'emprunt si l'utilisateur a déjà 3 emprunts en cours
+CREATE TRIGGER trg_verif_limite_emprunts
+BEFORE INSERT ON emprunt
+FOR EACH ROW
+BEGIN
+    DECLARE v_nb_emprunts INT;
+    
+    SELECT COUNT(*) INTO v_nb_emprunts 
+    FROM emprunt 
+    WHERE id_utilisateur = NEW.id_utilisateur 
+    AND date_retour_effective IS NULL;
+    
+    IF v_nb_emprunts >= 3 THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Erreur : L''utilisateur a déjà atteint la limite de 3 emprunts en cours.';
+    END IF;
+END //
+
+
+-- 2. Trigger : Bloquer l'emprunt si le compte est inactif
+CREATE TRIGGER trg_verif_compte_actif
+BEFORE INSERT ON emprunt
+FOR EACH ROW
+BEGIN
+    DECLARE v_actif BOOLEAN;
+    
+    SELECT actif INTO v_actif 
+    FROM utilisateur 
+    WHERE id_utilisateur = NEW.id_utilisateur;
+    
+    IF v_actif = FALSE THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Erreur : Ce compte utilisateur est désactivé.';
+    END IF;
+END //
+
+DELIMITER ;

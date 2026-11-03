@@ -11,7 +11,7 @@ public class JeuVideo extends Media {
 
     @Override
     public String getType() {
-        return TypeMedia.JEU_VIDEO.name();
+        return "JEU_VIDEO";
     }
 
     public String getPlateforme() { return plateforme; }
