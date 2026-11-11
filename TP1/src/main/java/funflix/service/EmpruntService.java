@@ -2,9 +2,11 @@ package funflix.service;
 
 import funflix.bdd.ConnexionBD;
 import funflix.dao.EmpruntDao;
+import funflix.modele.Emprunt;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.List;
 
 public class EmpruntService {
 
@@ -15,33 +17,48 @@ public class EmpruntService {
     }
 
     public void emprunter(int idUtilisateur, int idMedia, int dureeJours) throws Exception {
+        emprunter(List.of(idUtilisateur), idMedia, dureeJours, null);
+    }
+
+    public void emprunter(List<Integer> idUtilisateurs, int idMedia, int dureeJours, Integer idReservation) throws Exception {
         if (dureeJours <= 0 || dureeJours > 15) {
-            throw new IllegalArgumentException("C-02 : La durée d'emprunt doit être comprise entre 1 et 15 jours.");
+            throw new IllegalArgumentException("La durée d'emprunt doit être comprise entre 1 et 15 jours.");
+        }
+        if (idUtilisateurs == null || idUtilisateurs.isEmpty()) {
+            throw new IllegalArgumentException("Un emprunt doit comporter au moins un emprunteur.");
         }
 
         try (Connection conn = ConnexionBD.get()) {
+            boolean autoCommitInitial = conn.getAutoCommit();
             conn.setAutoCommit(false);
             try {
-                String sqlUser = "SELECT actif FROM utilisateur WHERE id_utilisateur = ?";
-                try (PreparedStatement ps = conn.prepareStatement(sqlUser)) {
-                    ps.setInt(1, idUtilisateur);
-                    try (ResultSet rs = ps.executeQuery()) {
-                        if (!rs.next() || !rs.getBoolean("actif")) {
-                            throw new IllegalStateException("C-04 : Le compte utilisateur est inactif ou inexistant.");
+                for (int idUtilisateur : idUtilisateurs) {
+                    // Vérifier si l'utilisateur est actif
+                    String sqlUser = "SELECT actif FROM utilisateur WHERE id_utilisateur = ?";
+                    try (PreparedStatement ps = conn.prepareStatement(sqlUser)) {
+                        ps.setInt(1, idUtilisateur);
+                        try (ResultSet rs = ps.executeQuery()) {
+                            if (!rs.next() || !rs.getBoolean("actif")) {
+                                throw new IllegalStateException("Le compte utilisateur ID " + idUtilisateur + " est inactif or inexistant.");
+                            }
+                        }
+                    }
+
+                    // Vérifier la limite de 3 emprunts en cours via co_emprunteur
+                    String sqlCountUser = "SELECT COUNT(*) FROM emprunt e " +
+                                          "JOIN co_emprunteur ce ON e.id_emprunt = ce.id_emprunt " +
+                                          "WHERE ce.id_utilisateur = ? AND e.date_retour_effective IS NULL";
+                    try (PreparedStatement ps = conn.prepareStatement(sqlCountUser)) {
+                        ps.setInt(1, idUtilisateur);
+                        try (ResultSet rs = ps.executeQuery()) {
+                            if (rs.next() && rs.getInt(1) >= 3) {
+                                throw new IllegalStateException("L'utilisateur ID " + idUtilisateur + " a atteint la limite de 3 emprunts simultanés.");
+                            }
                         }
                     }
                 }
 
-                String sqlCountUser = "SELECT COUNT(*) FROM emprunt WHERE id_utilisateur = ? AND date_retour_effective IS NULL";
-                try (PreparedStatement ps = conn.prepareStatement(sqlCountUser)) {
-                    ps.setInt(1, idUtilisateur);
-                    try (ResultSet rs = ps.executeQuery()) {
-                        if (rs.next() && rs.getInt(1) >= 3) {
-                            throw new IllegalStateException("C-01 : Limite de 3 emprunts simultanés atteinte.");
-                        }
-                    }
-                }
-
+                // Vérifier les stocks du média avec verrouillage
                 String sqlLockMedia = "SELECT nb_exemplaires FROM media WHERE id_media = ? FOR UPDATE";
                 int nbExemplaires;
                 try (PreparedStatement ps = conn.prepareStatement(sqlLockMedia)) {
@@ -66,26 +83,31 @@ public class EmpruntService {
                 }
 
                 if ((nbExemplaires - nbEmpruntes) <= 0) {
-                    throw new MediaIndisponibleException("C-03 : Aucun exemplaire disponible pour le média id=" + idMedia);
+                    throw new MediaIndisponibleException("Aucun exemplaire disponible pour le média id=" + idMedia);
                 }
 
-                String sqlInsert = "INSERT INTO emprunt (id_utilisateur, id_media, date_emprunt, date_retour_prevue, prolonge) " +
-                                   "VALUES (?, ?, ?, ?, FALSE)";
-                try (PreparedStatement ps = conn.prepareStatement(sqlInsert)) {
-                    LocalDate aujourdhui = LocalDate.now();
-                    ps.setInt(1, idUtilisateur);
-                    ps.setInt(2, idMedia);
-                    ps.setDate(3, Date.valueOf(aujourdhui));
-                    ps.setDate(4, Date.valueOf(aujourdhui.plusDays(dureeJours)));
-                    ps.executeUpdate();
-                }
+                // Créer l'objet Emprunt et utiliser le DAO transactionnel
+                LocalDate aujourdhui = LocalDate.now();
+                Emprunt nouvelEmprunt = new Emprunt(
+                        0,
+                        idUtilisateurs,
+                        idMedia,
+                        aujourdhui,
+                        aujourdhui.plusDays(dureeJours),
+                        null,
+                        false,
+                        null,
+                        idReservation
+                );
+
+                empruntDao.creer(conn, nouvelEmprunt);
 
                 conn.commit();
             } catch (Exception e) {
                 conn.rollback();
                 throw e;
             } finally {
-                conn.setAutoCommit(true);
+                conn.setAutoCommit(autoCommitInitial);
             }
         }
     }

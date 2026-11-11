@@ -22,15 +22,10 @@ public abstract class Media {
         this.nbExemplaires = nbExemplaires;
     }
 
-    /**
-     * Règle C-03 : Vérifie dynamiquement si le média est disponible
-     * en fonction du nombre d'emprunts en cours (calculé par le DAO/Service).
-     */
     public boolean estDisponible(int nbEmpruntsEnCours) {
         return (this.nbExemplaires - nbEmpruntsEnCours) > 0;
     }
 
-    // Surcharge sans paramètre correspondant à la signature UML (+estDisponible() : boolean)
     public boolean estDisponible() {
         return this.nbExemplaires > 0;
     }

@@ -1,31 +1,43 @@
 package funflix.modele;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Emprunt {
     private int id;
-    private int idUtilisateur;
+    private List<Integer> idUtilisateurs = new ArrayList<>();
     private int idMedia;
     private LocalDate dateEmprunt;
     private LocalDate dateRetourPrevue;
     private LocalDate dateRetourEffective;
     private boolean prolonge;
     private String etatRetour;
+    private Integer idReservation;
 
-    public Emprunt(int id, int idUtilisateur, int idMedia, LocalDate dateEmprunt,
+    public Emprunt(int id, List<Integer> idUtilisateurs, int idMedia, LocalDate dateEmprunt,
                    LocalDate dateRetourPrevue, LocalDate dateRetourEffective,
-                   boolean prolonge, String etatRetour) {
+                   boolean prolonge, String etatRetour, Integer idReservation) {
         if (dateRetourPrevue.isBefore(dateEmprunt)) {
             throw new IllegalArgumentException("La date de retour prévue ne peut pas précéder la date d'emprunt.");
         }
         this.id = id;
-        this.idUtilisateur = idUtilisateur;
+        if (idUtilisateurs != null) {
+            this.idUtilisateurs = new ArrayList<>(idUtilisateurs);
+        }
         this.idMedia = idMedia;
         this.dateEmprunt = dateEmprunt;
         this.dateRetourPrevue = dateRetourPrevue;
         this.dateRetourEffective = dateRetourEffective;
         this.prolonge = prolonge;
         this.etatRetour = etatRetour;
+        this.idReservation = idReservation;
+    }
+
+    public Emprunt(int id, int idUtilisateur, int idMedia, LocalDate dateEmprunt,
+                   LocalDate dateRetourPrevue, LocalDate dateRetourEffective,
+                   boolean prolonge, String etatRetour) {
+        this(id, List.of(idUtilisateur), idMedia, dateEmprunt, dateRetourPrevue, dateRetourEffective, prolonge, etatRetour, null);
     }
 
     public boolean estEnRetard() {
@@ -41,7 +53,7 @@ public class Emprunt {
 
     public void prolonger(int jours) {
         if (this.prolonge) {
-            throw new IllegalStateException("C-05 : Cet emprunt a déjà été prolongé une fois.");
+            throw new IllegalStateException("Cet emprunt a déjà été prolongé une fois.");
         }
         if (this.dateRetourEffective != null) {
             throw new IllegalStateException("Impossible de prolonger un emprunt déjà rendu.");
@@ -58,16 +70,27 @@ public class Emprunt {
         this.etatRetour = etat;
     }
 
-    // Getters
+    public void ajouterCoEmprunteur(int idUtilisateur) {
+        if (!this.idUtilisateurs.contains(idUtilisateur)) {
+            this.idUtilisateurs.add(idUtilisateur);
+        }
+    }
+
     public int getId() { return id; }
-    public int getIdUtilisateur() { return idUtilisateur; }
+    public void setId(int id) { this.id = id; }
+
+    public List<Integer> getIdUtilisateurs() { return idUtilisateurs; }
+    public void setIdUtilisateurs(List<Integer> idUtilisateurs) { this.idUtilisateurs = idUtilisateurs; }
+
     public int getIdMedia() { return idMedia; }
+    public void setIdMedia(int idMedia) { this.idMedia = idMedia; }
+
     public LocalDate getDateEmprunt() { return dateEmprunt; }
     public LocalDate getDateRetourPrevue() { return dateRetourPrevue; }
     public LocalDate getDateRetourEffective() { return dateRetourEffective; }
     public boolean isProlonge() { return prolonge; }
     public String getEtatRetour() { return etatRetour; }
 
-    // Setters
-    public void setId(int id) { this.id = id; }
+    public Integer getIdReservation() { return idReservation; }
+    public void setIdReservation(Integer idReservation) { this.idReservation = idReservation; }
 }

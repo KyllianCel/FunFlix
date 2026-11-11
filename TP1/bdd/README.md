@@ -4,6 +4,8 @@ Ce dossier contient l'ensemble des scripts SQL et de la documentation nécessair
 
 ## 1. Structure et Modélisation (3FN)
 - **Héritage (Table par sous-classe) :** La table mère `media` centralise les attributs communs (titre, description, année, etc.). Les tables filles `jeu_video` et `jeu_societe` étendent cette table via une relation de clé primaire et étrangère.
+- **Co-emprunts et Co-réservations (Relations N-M) :** Les tables associatives `co_emprunteur` et `co_reservataire` permettent d'associer un ou plusieurs adhérents (`1..*`) à un même emprunt ou à une même réservation.
+- **Traçabilité Réservation vers Emprunt :** La table `emprunt` intègre une clé étrangère optionnelle `id_reservation` (`0..1`) permettant de lier un emprunt à la réservation initiale qu'il concrétise.
 - **Données non stockées :** Aucune donnée calculable (comme le stock disponible ou le retard d'un emprunt) n'est enregistrée en base. Tout est calculé dynamiquement ou vérifié par des transactions strictes dans la couche service Java.
 
 ## 2. Lancement de la base de données avec Docker Compose
@@ -20,6 +22,7 @@ Placez-vous à la racine du projet (là où se trouve le fichier `docker-compose
 ```bash
 docker compose up -d
 ```
+
 Cette commande va :
 - Télécharger l'image officielle de MariaDB.
 - Créer un réseau dédié.
@@ -32,13 +35,16 @@ Si vous souhaitez supprimer complètement le conteneur ainsi que toutes ses donn
 ```bash
 docker compose down -v
 ```
+
 Puis relancez le conteneur propre avec :
+
 ```bash
 docker compose up -d
 ```
 
 ### 4. Arrêt simple du conteneur
 Pour stopper le conteneur sans effacer les données :
+
 ```bash
 docker compose stop
 ```
@@ -48,12 +54,14 @@ Pour réinitialiser complètement l'environnement de base de données (par exemp
 
 1. **Supprimer et recréer la structure (Schéma) :**
    Exécutez le script `schema.sql` qui supprime les anciennes tables dans l'ordre des contraintes, recrée la base `ludotheque`, installe les tables et configure les index d'optimisation.
+
    ```bash
    docker exec -i ludotheque_db mariadb -u root -proot < schema.sql
    ```
 
 2. **Insérer le jeu de données de test :**
-   Exécutez le script `donnees_test.sql` pour peupler la base avec les utilisateurs (administrateurs et adhérents), le catalogue de médias pluridisciplinaire et l'historique des emprunts.
+   Exécutez le script `donnees_test.sql` pour peupler la base avec les utilisateurs (administrateurs et adhérents), le catalogue de médias pluridisciplinaire, les réservations et l'historique des emprunts (incluant des co-emprunteurs).
+
    ```bash
    docker exec -i ludotheque_db mariadb -u root -proot < donnees_test.sql
    ```
@@ -63,6 +71,7 @@ Pour connecter votre application Java à votre instance MariaDB :
 1. Rendez-vous dans le dossier `src/main/resources/`.
 2. Dupliquez le fichier `db.properties.example` et renommez la copie en **`db.properties`**.
 3. Renseignez vos accès locaux :
+
    ```properties
    db.url=jdbc:mariadb://localhost:3306/ludotheque
    db.user=root
