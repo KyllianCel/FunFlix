@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1">
+    <top>
+        <StackPane styleClass="entete">
+            <HBox spacing="10" alignment="CENTER_LEFT" maxWidth="864" styleClass="barre-navigation">
+                <Label text="FunFlix" styleClass="logo"/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Button fx:id="catalogue" text="Catalogue" styleClass="lien-navigation, bouton-cliquable"/>
+                    <Label text="•" styleClass="point-navigation"/>
+                    <Button fx:id="emprunts" text="Mes emprunts" styleClass="lien-navigation, bouton-cliquable"/>
+                    <Label text="•" styleClass="point-navigation"/>
+                    <Button fx:id="favoris" text="Mes favoris" styleClass="lien-navigation, bouton-cliquable"/>
+                    <Label text="•" styleClass="point-navigation"/>
+                    <Button fx:id="profil" text="Mon profil" styleClass="lien-navigation, bouton-cliquable"/>
+                </HBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="avatar" styleClass="avatar"/>
+                <Button fx:id="deconnexion" text="Déconnexion" styleClass="deconnexion, bouton-cliquable"/>
+            </HBox>
+        </StackPane>
+    </top>
+</BorderPane>

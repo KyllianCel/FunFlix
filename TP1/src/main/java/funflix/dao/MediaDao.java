@@ -5,10 +5,44 @@ import funflix.bdd.DaoException;
 import funflix.modele.*;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MediaDao {
+    public record EntreeCatalogue(String titre, String type, String auteur,
+                                  boolean disponible, LocalDate retourPrevu) {
+    }
+
+    public List<EntreeCatalogue> listerCatalogue() {
+        String sql = """
+            SELECT m.titre, t.Libelle AS type_media, m.auteur_editeur,
+                   m.nb_exemplaires - COALESCE(e.en_cours, 0) AS disponibles,
+                   e.prochain_retour
+            FROM media m
+            JOIN type_media t ON t.id_type = m.id_type
+            LEFT JOIN (
+                SELECT id_media, COUNT(*) AS en_cours, MIN(date_retour_prevue) AS prochain_retour
+                FROM emprunt
+                WHERE date_retour_effective IS NULL
+                GROUP BY id_media
+            ) e ON e.id_media = m.id_media
+            ORDER BY m.id_media
+            """;
+        List<EntreeCatalogue> catalogue = new ArrayList<>();
+        try (Connection c = ConnexionBD.get();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                catalogue.add(new EntreeCatalogue(rs.getString("titre"), rs.getString("type_media"),
+                    rs.getString("auteur_editeur"), rs.getInt("disponibles") > 0,
+                    rs.getObject("prochain_retour", LocalDate.class)));
+            }
+        } catch (SQLException e) {
+            throw new DaoException("Impossible de lire les médias du catalogue.", e);
+        }
+        return catalogue;
+    }
 
     private static final String SQL_SELECT_BASE =
         "SELECT m.*, t.Libelle AS type_libelle, jv.plateforme, js.nb_personnes " +

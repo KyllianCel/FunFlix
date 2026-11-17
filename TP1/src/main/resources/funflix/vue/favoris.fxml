@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="24" xmlns:fx="http://javafx.com/fxml/1">
+    <VBox spacing="4">
+        <Label text="Mes favoris" styleClass="titre-section"/>
+        <Label fx:id="compteur" styleClass="compteur"/>
+    </VBox>
+    <VBox fx:id="liste" spacing="12"/>
+</VBox>

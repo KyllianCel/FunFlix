@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+
+<VBox spacing="30" xmlns:fx="http://javafx.com/fxml/1">
+    <VBox fx:id="vedette" spacing="27">
+        <Label text="Jeu vidéo" styleClass="titre-section"/>
+    </VBox>
+    <Separator fx:id="separation"/>
+    <VBox fx:id="catalogue" spacing="27">
+        <VBox spacing="20">
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <VBox spacing="4">
+                    <Label text="Catalogue" styleClass="titre-section"/>
+                    <Label fx:id="compteur" styleClass="compteur"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <StackPane>
+                    <TextField promptText="Rechercher un titre, un auteur..." accessibleText="Rechercher un média"
+                               prefWidth="260" styleClass="recherche"/>
+                    <Group mouseTransparent="true" StackPane.alignment="CENTER_RIGHT">
+                        <StackPane.margin><Insets right="12"/></StackPane.margin>
+                        <Circle centerX="9" centerY="9" radius="5" styleClass="cercle-loupe"/>
+                        <Line startX="13" startY="13" endX="17" endY="17" styleClass="manche-loupe"/>
+                    </Group>
+                </StackPane>
+            </HBox>
+            <HBox fx:id="filtres" spacing="7"/>
+        </VBox>
+    </VBox>
+</VBox>

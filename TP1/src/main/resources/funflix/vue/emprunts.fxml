@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="22" styleClass="page-emprunts" xmlns:fx="http://javafx.com/fxml/1">
+    <VBox spacing="4">
+        <Label text="Mes emprunts" styleClass="titre-section"/>
+        <Label fx:id="description" styleClass="compteur"/>
+    </VBox>
+    <VBox spacing="10">
+        <Label text="En cours" styleClass="nom-profil"/>
+        <VBox fx:id="liste" spacing="12"/>
+    </VBox>
+    <VBox fx:id="historique" spacing="10">
+        <Label text="Historique" styleClass="nom-profil"/>
+    </VBox>
+</VBox>

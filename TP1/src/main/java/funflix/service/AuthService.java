@@ -30,7 +30,8 @@ public class AuthService {
         Optional<Utilisateur> opt = utilisateurDao.trouverParEmail(email);
         
         // Vérification Bcrypt entre le mot de passe tapé et le hash stocké
-        if (opt.isPresent() && Hacheur.verifier(mdp, opt.get().getMotDePasseHash())) {
+        if (opt.isPresent() && opt.get().isActif()
+                && Hacheur.verifier(mdp, opt.get().getMotDePasseHash())) {
             return opt;
         }
         return Optional.empty();

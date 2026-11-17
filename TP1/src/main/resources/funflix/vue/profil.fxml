@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="18" xmlns:fx="http://javafx.com/fxml/1">
+    <Label text="Mon profil" styleClass="titre-section"/>
+    <HBox spacing="16" alignment="CENTER_LEFT" styleClass="panneau-compte">
+        <Label fx:id="avatar" styleClass="avatar, avatar-profil"/>
+        <VBox spacing="5">
+            <Label fx:id="identite" styleClass="nom-profil"/>
+            <Label fx:id="role" styleClass="sous-titre-ligne"/>
+        </VBox>
+    </HBox>
+    <VBox spacing="16" styleClass="panneau-compte, coordonnees-profil">
+        <Label text="Informations personnelles" styleClass="nom-profil"/>
+        <HBox spacing="16">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Prénom" styleClass="libelle-profil" labelFor="${prenom}"/>
+                <TextField fx:id="prenom" editable="false" styleClass="champ-profil"/>
+            </VBox>
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Nom" styleClass="libelle-profil" labelFor="${nom}"/>
+                <TextField fx:id="nom" editable="false" styleClass="champ-profil"/>
+            </VBox>
+        </HBox>
+        <VBox spacing="5">
+            <Label text="Adresse e-mail" styleClass="libelle-profil" labelFor="${email}"/>
+            <TextField fx:id="email" editable="false" styleClass="champ-profil"/>
+        </VBox>
+        <VBox spacing="5">
+            <Label text="Téléphone" styleClass="libelle-profil" labelFor="${telephone}"/>
+            <TextField fx:id="telephone" editable="false" styleClass="champ-profil"/>
+        </VBox>
+    </VBox>
+</VBox>

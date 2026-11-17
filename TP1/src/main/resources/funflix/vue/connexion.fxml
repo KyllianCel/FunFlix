@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<GridPane xmlns:fx="http://javafx.com/fxml/1">
+    <columnConstraints>
+        <ColumnConstraints percentWidth="51.5"/>
+        <ColumnConstraints percentWidth="48.5"/>
+    </columnConstraints>
+    <VBox styleClass="banniere-auth">
+        <Label text="FunFlix" styleClass="logo-auth"/>
+        <Region VBox.vgrow="ALWAYS"/>
+        <HBox spacing="12">
+            <Label text="Jeux vidéo" styleClass="vignette-auth, vignette-jeu"/>
+            <Label text="BD" styleClass="vignette-auth, vignette-bd"/>
+            <Label text="Mangas" styleClass="vignette-auth, vignette-manga"/>
+            <Label text="Jeux de société" styleClass="vignette-auth, vignette-societe"/>
+        </HBox>
+        <Region VBox.vgrow="ALWAYS"/>
+        <VBox spacing="18">
+            <Label text="Empruntez, jouez,&#10;rapportez." styleClass="accroche-auth"/>
+            <Label text="Jeux vidéo, BD, mangas et jeux de société : réservez en ligne et suivez vos emprunts depuis votre espace."
+                   styleClass="texte-banniere" wrapText="true" maxWidth="335"/>
+        </VBox>
+    </VBox>
+    <ScrollPane GridPane.columnIndex="1" GridPane.vgrow="ALWAYS" fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER">
+        <StackPane styleClass="panneau-auth">
+            <VBox spacing="16" maxWidth="320" maxHeight="-Infinity" styleClass="carte-auth">
+                <HBox styleClass="onglets-auth">
+                    <Button fx:id="connexion" text="Connexion" prefWidth="0" maxWidth="Infinity" HBox.hgrow="ALWAYS"
+                            styleClass="onglet-auth, bouton-cliquable"/>
+                    <Button fx:id="inscription" text="Créer un compte" prefWidth="0" maxWidth="Infinity" HBox.hgrow="ALWAYS"
+                            styleClass="onglet-auth, bouton-cliquable"/>
+                </HBox>
+                <VBox fx:id="formulaire" spacing="12">
+                    <VBox spacing="4">
+                        <Label fx:id="titre" styleClass="titre-section"/>
+                        <Label fx:id="sousTitre" styleClass="compteur" wrapText="true"/>
+                    </VBox>
+                    <VBox fx:id="identite" spacing="12">
+                        <VBox spacing="4">
+                            <Label text="Prénom" styleClass="libelle-profil" labelFor="${prenom}"/>
+                            <TextField fx:id="prenom" styleClass="champ-profil"/>
+                        </VBox>
+                        <VBox spacing="4">
+                            <Label text="Nom" styleClass="libelle-profil" labelFor="${nom}"/>
+                            <TextField fx:id="nom" styleClass="champ-profil"/>
+                        </VBox>
+                    </VBox>
+                    <VBox spacing="4">
+                        <Label text="Adresse e-mail" styleClass="libelle-profil" labelFor="${email}"/>
+                        <TextField fx:id="email" promptText="prenom.nom@exemple.fr" styleClass="champ-profil"/>
+                    </VBox>
+                    <VBox spacing="4">
+                        <Label text="Mot de passe" styleClass="libelle-profil" labelFor="${motDePasse}"/>
+                        <PasswordField fx:id="motDePasse" promptText="••••••••" styleClass="champ-profil"/>
+                    </VBox>
+                    <HBox fx:id="options" spacing="6" alignment="CENTER_LEFT">
+                        <CheckBox fx:id="memoriser" text="Se souvenir de moi" styleClass="memoriser-auth, bouton-cliquable">
+                            <tooltip><Tooltip text="Mémorise uniquement l’adresse e-mail sur cet ordinateur."/></tooltip>
+                        </CheckBox>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label text="Mot de passe oublié ?" styleClass="aide-auth"/>
+                    </HBox>
+                    <Label fx:id="message" wrapText="true" styleClass="message-auth"/>
+                    <Button fx:id="valider" defaultButton="true" maxWidth="Infinity"
+                            styleClass="valider-auth, bouton-cliquable"/>
+                    <Label fx:id="admin" text="Administrateur ? Accéder à l’espace admin" maxWidth="Infinity" styleClass="pied-auth"/>
+                </VBox>
+            </VBox>
+        </StackPane>
+    </ScrollPane>
+</GridPane>

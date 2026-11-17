@@ -15,8 +15,6 @@ import java.util.Properties;
  */
 public final class ConnexionBD {
 
-    private static final Properties PROPS = charger();
-
     private ConnexionBD() { }
 
     private static Properties charger() {
@@ -33,7 +31,11 @@ public final class ConnexionBD {
     }
 
     public static Connection get() {
-        String url = PROPS.getProperty("db.url");
+        Properties props = charger();
+        String url = props.getProperty("db.url");
+        if (url == null || url.isBlank()) {
+            throw new DaoException("db.url doit être renseignée dans db.properties", null);
+        }
         try {
             if (url.startsWith("jdbc:sqlite")) {
                 Connection c = DriverManager.getConnection(url);
@@ -43,7 +45,7 @@ public final class ConnexionBD {
                 }
                 return c;
             }
-            return DriverManager.getConnection(url, PROPS.getProperty("db.user"), PROPS.getProperty("db.password"));
+            return DriverManager.getConnection(url, props.getProperty("db.user"), props.getProperty("db.password"));
         } catch (SQLException e) {
             throw new DaoException("Connexion à la base impossible : " + url, e);
         }
